@@ -1,0 +1,10 @@
+{
+    "name": "Deno Codespace",
+    "image": "hayd/debian-deno",
+    "settings": { 
+        "terminal.integrated.shell.linux": "/bin/bash",
+    },
+    "extensions": [
+        "denoland.vscode-deno"
+    ]
+}
