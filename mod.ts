@@ -1,14 +1,33 @@
-import { serve } from "https://deno.land/std@0.74.0/http/server.ts";
-const server = serve({ port: 8000 });
+/** Will be true when accessed within the context of a GitHub Codespace. */
+export const CODESPACES = !!Deno.env.get("CODESPACES");
 
-const headers = new Headers();
-headers.set("content-type", "text/plain");
+/**
+ * Get the Github Codespace URL of a forwarded port.
+ * Ported to Deno from https://www.npmjs.com/package/codespaces-port.
+ * 
+ * @param port Specify a port in order to retrieve it's URL.
+ * 
+ */
+export function getCodespaceURL(
+  port: string | number,
+): string | void {
+  if (!CODESPACES) return;
 
-console.log("http://localhost:8000/")
-for await (const req of server) {
-    req.respond({
-        headers,
-        status: 200,
-        body: "Hello World\n"
-    });
+  const id = Deno.env.get("CLOUDENV_ENVIRONMENT_ID");
+  const url = `https://${id}-${port}.apps.codespaces.githubusercontent.com`;
+  return url;
+}
+
+if (import.meta.main) {
+  const port = Deno.args[0];
+  if (!port) {
+    throw new TypeError("Specify a port in order to retrieve it's URL.");
+  }
+  const url = getCodespaceURL(port);
+  if (!url) {
+    throw new Error(
+      "This tool can only be run within the context of a GitHub Codespace: https://github.com/features/codespaces.",
+    );
+  }
+  console.log(url);
 }
